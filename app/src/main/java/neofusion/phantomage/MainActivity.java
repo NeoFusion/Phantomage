@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SAVED_STATE_IMAGE_URI = "imageUri";
 
+    public static final String ACTION_STOP_SERVICE = "neofusion.phantomage.STOP_SERVICE";
+
     private Uri mImageUri;
     private ImageView mImageView;
     private SeekBar mSeekBar;
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopService(new Intent(MainActivity.this, OverlayService.class));
+                stopOverlayService();
             }
         });
         selectImageButton.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
                 mImageView.setImageDrawable(null);
             }
         });
+        if (ACTION_STOP_SERVICE.equals(getIntent().getAction())) {
+            stopOverlayService();
+        }
     }
 
     private void startOverlayService() {
@@ -95,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         float alpha = mSeekBar.getProgress() / 100F;
         intent.putExtra(OverlayService.INTENT_EXTRA_ALPHA, alpha);
         if (Settings.canDrawOverlays(getApplicationContext())) {
-            startService(intent);
+            startForegroundService(intent);
         } else {
             Snackbar.make(mMainView, R.string.permission_overlay, Snackbar.LENGTH_INDEFINITE)
                     .setAction(R.string.snackbar_settings, new View.OnClickListener() {
@@ -107,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .show();
         }
+    }
+
+    private void stopOverlayService() {
+        stopService(new Intent(MainActivity.this, OverlayService.class));
     }
 
     @Override

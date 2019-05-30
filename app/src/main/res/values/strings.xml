@@ -4,7 +4,10 @@
     <string name="button_stop">Hide overlay</string>
     <string name="button_select_image">Select image</string>
     <string name="button_clear_image">Clear image</string>
+    <string name="channel_main">Main</string>
     <string name="image_view_description">Image preview</string>
+    <string name="notification_title">This app display on top of other apps you\'re using</string>
+    <string name="notification_text">Press here to hide overlay</string>
     <string name="permission_overlay">Allow display over other apps</string>
     <string name="snackbar_settings">SETTINGS</string>
     <string name="text_about">v0.1.0, © NeoFusion, 2019</string>
