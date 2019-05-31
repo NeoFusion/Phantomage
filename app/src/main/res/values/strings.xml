@@ -12,4 +12,6 @@
     <string name="snackbar_settings">SETTINGS</string>
     <string name="text_about">v0.1.0, © NeoFusion, 2019</string>
     <string name="text_opaque">Opaque: %1$d%%</string>
+    <string name="text_padding">Padding:</string>
+    <string name="text_px">px</string>
 </resources>

@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.IBinder;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 
 public class OverlayService extends Service {
     public static final String INTENT_EXTRA_ALPHA = "alpha";
+    public static final String INTENT_EXTRA_PADDING = "padding";
     public static final String CHANNEL_MAIN = "channel_main";
     public static final int NOTIFICATION_ID = 1;
 
@@ -47,6 +49,7 @@ public class OverlayService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Uri uri = intent.getData();
         float alpha = intent.getFloatExtra(INTENT_EXTRA_ALPHA, 1F);
+        int padding = intent.getIntExtra(INTENT_EXTRA_PADDING, 0);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -57,7 +60,9 @@ public class OverlayService extends Service {
                 PixelFormat.TRANSLUCENT
         );
         layoutParams.alpha = alpha;
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mImageView.setImageURI(uri);
+        mImageView.setPadding(0, padding, 0, 0);
         if (!isRunning) {
             mWindowManager.addView(mOverlayView, layoutParams);
             createNotification();

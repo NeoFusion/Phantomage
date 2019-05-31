@@ -66,6 +66,38 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button_select_image" />
 
+    <EditText
+        android:id="@+id/edit_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="3"
+        android:inputType="numberDecimal"
+        android:maxLength="4"
+        android:textAlignment="viewEnd"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_select_image" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/text_padding"
+        app:layout_constraintBaseline_toBaselineOf="@+id/edit_padding"
+        app:layout_constraintEnd_toStartOf="@+id/edit_padding"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/text_px"
+        app:layout_constraintBaseline_toBaselineOf="@+id/edit_padding"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@+id/edit_padding" />
+
     <ImageView
         android:id="@+id/image_view"
         android:layout_width="0dp"
@@ -74,7 +106,7 @@
         app:layout_constraintBottom_toTopOf="@+id/text_about"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_select_image" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_padding" />
 
     <TextView
         android:id="@+id/text_about"

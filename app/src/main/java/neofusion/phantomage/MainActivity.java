@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Uri mImageUri;
     private ImageView mImageView;
+    private EditText mPaddingEdit;
     private SeekBar mSeekBar;
     private View mMainView;
 
@@ -36,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         mMainView = findViewById(R.id.main_layout);
         mImageView = findViewById(R.id.image_view);
         mImageView.setImageURI(mImageUri);
+        mPaddingEdit = findViewById(R.id.edit_padding);
+        mPaddingEdit.setText("0");
         mSeekBar = findViewById(R.id.seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             TextView opaqueText = findViewById(R.id.text_opaque);
@@ -98,7 +102,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, OverlayService.class);
         intent.setData(mImageUri);
         float alpha = mSeekBar.getProgress() / 100F;
+        int padding = Integer.parseInt(mPaddingEdit.getText().toString());
         intent.putExtra(OverlayService.INTENT_EXTRA_ALPHA, alpha);
+        intent.putExtra(OverlayService.INTENT_EXTRA_PADDING, padding);
         if (Settings.canDrawOverlays(getApplicationContext())) {
             startForegroundService(intent);
         } else {
