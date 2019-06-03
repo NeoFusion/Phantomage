@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 public class MainActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 1;
 
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mPaddingEdit;
     private SeekBar mSeekBar;
     private View mMainView;
+    private float mAngle = 0F;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,22 @@ public class MainActivity extends AppCompatActivity {
         }
         mMainView = findViewById(R.id.main_layout);
         mImageView = findViewById(R.id.image_view);
-        mImageView.setImageURI(mImageUri);
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mImageUri != null) {
+                    mAngle = mAngle == 270F ? 0 : mAngle + 90F;
+                    if (mAngle == 0) {
+                        Glide.with(getApplicationContext()).load(mImageUri).into(mImageView);
+                    } else {
+                        Glide.with(getApplicationContext()).load(mImageUri).transform(new RotateTransformation(mAngle)).into(mImageView);
+                    }
+                }
+            }
+        });
+        if (mImageUri != null) {
+            Glide.with(this).load(mImageUri).into(mImageView);
+        }
         mPaddingEdit = findViewById(R.id.edit_padding);
         mPaddingEdit.setText("0");
         mSeekBar = findViewById(R.id.seek_bar);
@@ -87,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mImageUri = null;
-                mImageView.setImageDrawable(null);
+                Glide.with(getApplicationContext()).clear(mImageView);
             }
         });
         if (ACTION_STOP_SERVICE.equals(getIntent().getAction())) {
@@ -104,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         float alpha = mSeekBar.getProgress() / 100F;
         int padding = Integer.parseInt(mPaddingEdit.getText().toString());
         intent.putExtra(OverlayService.INTENT_EXTRA_ALPHA, alpha);
+        intent.putExtra(OverlayService.INTENT_EXTRA_ANGLE, mAngle);
         intent.putExtra(OverlayService.INTENT_EXTRA_PADDING, padding);
         if (Settings.canDrawOverlays(getApplicationContext())) {
             startForegroundService(intent);
@@ -134,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             mImageUri = data.getData();
-            mImageView.setImageURI(mImageUri);
+            Glide.with(this).load(mImageUri).into(mImageView);
         }
     }
 }

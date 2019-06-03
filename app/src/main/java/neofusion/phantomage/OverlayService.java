@@ -17,8 +17,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+
 public class OverlayService extends Service {
     public static final String INTENT_EXTRA_ALPHA = "alpha";
+    public static final String INTENT_EXTRA_ANGLE = "angle";
     public static final String INTENT_EXTRA_PADDING = "padding";
     public static final String CHANNEL_MAIN = "channel_main";
     public static final int NOTIFICATION_ID = 1;
@@ -49,6 +52,7 @@ public class OverlayService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Uri uri = intent.getData();
         float alpha = intent.getFloatExtra(INTENT_EXTRA_ALPHA, 1F);
+        float angle = intent.getFloatExtra(INTENT_EXTRA_ANGLE, 0F);
         int padding = intent.getIntExtra(INTENT_EXTRA_PADDING, 0);
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -61,8 +65,12 @@ public class OverlayService extends Service {
         );
         layoutParams.alpha = alpha;
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        mImageView.setImageURI(uri);
         mImageView.setPadding(0, padding, 0, 0);
+        if (angle == 0F) {
+            Glide.with(this).load(uri).into(mImageView);
+        } else {
+            Glide.with(this).load(uri).transform(new RotateTransformation(angle)).into(mImageView);
+        }
         if (!isRunning) {
             mWindowManager.addView(mOverlayView, layoutParams);
             createNotification();
