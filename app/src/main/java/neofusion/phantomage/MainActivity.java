@@ -2,7 +2,9 @@ package neofusion.phantomage;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -20,10 +22,16 @@ import com.bumptech.glide.Glide;
 public class MainActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 1;
 
+    private static final String SETTINGS_IMAGE_URI = "imageUri";
+    private static final String SETTINGS_ALPHA = "alpha";
+    private static final String SETTINGS_ANGLE = "angle";
+    private static final String SETTINGS_PADDING = "padding";
+
     private static final String SAVED_STATE_IMAGE_URI = "imageUri";
 
     public static final String ACTION_STOP_SERVICE = "neofusion.phantomage.STOP_SERVICE";
 
+    private SharedPreferences mSettings;
     private Uri mImageUri;
     private ImageView mImageView;
     private EditText mPaddingEdit;
@@ -35,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         if (savedInstanceState != null) {
             mImageUri = savedInstanceState.getParcelable(SAVED_STATE_IMAGE_URI);
         }
@@ -45,19 +54,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mImageUri != null) {
                     mAngle = mAngle == 270F ? 0 : mAngle + 90F;
-                    if (mAngle == 0) {
-                        Glide.with(getApplicationContext()).load(mImageUri).into(mImageView);
-                    } else {
-                        Glide.with(getApplicationContext()).load(mImageUri).transform(new RotateTransformation(mAngle)).into(mImageView);
-                    }
+                    loadImage();
                 }
             }
         });
-        if (mImageUri != null) {
-            Glide.with(this).load(mImageUri).into(mImageView);
-        }
         mPaddingEdit = findViewById(R.id.edit_padding);
-        mPaddingEdit.setText("0");
         mSeekBar = findViewById(R.id.seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             TextView opaqueText = findViewById(R.id.text_opaque);
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        mSeekBar.setProgress(50);
         Button startButton = findViewById(R.id.button_start);
         Button stopButton = findViewById(R.id.button_stop);
         Button selectImageButton = findViewById(R.id.button_select_image);
@@ -104,13 +104,22 @@ public class MainActivity extends AppCompatActivity {
         clearImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mAngle = 0F;
                 mImageUri = null;
                 Glide.with(getApplicationContext()).clear(mImageView);
             }
         });
+        restoreSettings();
+        loadImage();
         if (ACTION_STOP_SERVICE.equals(getIntent().getAction())) {
             stopOverlayService();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveSettings();
     }
 
     private void startOverlayService() {
@@ -120,10 +129,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, OverlayService.class);
         intent.setData(mImageUri);
         float alpha = mSeekBar.getProgress() / 100F;
-        int padding = Integer.parseInt(mPaddingEdit.getText().toString());
         intent.putExtra(OverlayService.INTENT_EXTRA_ALPHA, alpha);
         intent.putExtra(OverlayService.INTENT_EXTRA_ANGLE, mAngle);
-        intent.putExtra(OverlayService.INTENT_EXTRA_PADDING, padding);
+        intent.putExtra(OverlayService.INTENT_EXTRA_PADDING, getPadding());
         if (Settings.canDrawOverlays(getApplicationContext())) {
             startForegroundService(intent);
         } else {
@@ -143,6 +151,49 @@ public class MainActivity extends AppCompatActivity {
         stopService(new Intent(MainActivity.this, OverlayService.class));
     }
 
+    private void saveSettings() {
+        SharedPreferences.Editor editor = mSettings.edit();
+        if (mImageUri != null) {
+            editor.putString(SETTINGS_IMAGE_URI, mImageUri.toString());
+        }
+        editor.putInt(SETTINGS_ALPHA, mSeekBar.getProgress());
+        editor.putFloat(SETTINGS_ANGLE, mAngle);
+        editor.putInt(SETTINGS_PADDING, getPadding());
+        editor.apply();
+    }
+
+    private void restoreSettings() {
+        if (mSettings.contains(SETTINGS_IMAGE_URI)) {
+            String imageUriString = mSettings.getString(SETTINGS_IMAGE_URI, null);
+            if (imageUriString != null) {
+                mImageUri = Uri.parse(imageUriString);
+            }
+        }
+        if (mSettings.contains(SETTINGS_ANGLE)) {
+            mAngle = mSettings.getFloat(SETTINGS_ANGLE, 0F);
+        }
+        if (mSettings.contains(SETTINGS_PADDING)) {
+            mPaddingEdit.setText(String.valueOf(mSettings.getInt(SETTINGS_PADDING, 0)));
+        } else {
+            mPaddingEdit.setText("0");
+        }
+        if (mSettings.contains(SETTINGS_ALPHA)) {
+            mSeekBar.setProgress(mSettings.getInt(SETTINGS_ALPHA, 50));
+        } else {
+            mSeekBar.setProgress(50);
+        }
+    }
+
+    private void loadImage() {
+        if (mImageUri != null) {
+            if (mAngle == 0) {
+                Glide.with(this).load(mImageUri).into(mImageView);
+            } else {
+                Glide.with(this).load(mImageUri).transform(new RotateTransformation(mAngle)).into(mImageView);
+            }
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(SAVED_STATE_IMAGE_URI, mImageUri);
@@ -153,7 +204,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             mImageUri = data.getData();
-            Glide.with(this).load(mImageUri).into(mImageView);
+            loadImage();
         }
+    }
+
+    private int getPadding() {
+        return Integer.parseInt(mPaddingEdit.getText().toString());
     }
 }
