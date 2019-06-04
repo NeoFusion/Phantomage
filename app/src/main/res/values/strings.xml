@@ -14,4 +14,6 @@
     <string name="text_opaque">Opaque: %1$d%%</string>
     <string name="text_padding">Padding:</string>
     <string name="text_px">px</string>
+    <string name="error_file_not_found">Failed to open source file</string>
+    <string name="error_io">Error while loading file</string>
 </resources>

@@ -18,16 +18,25 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class MainActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 1;
 
     private static final String SETTINGS_IMAGE_URI = "imageUri";
+    private static final String SETTINGS_IMAGE_KEY = "imageKey";
     private static final String SETTINGS_ALPHA = "alpha";
     private static final String SETTINGS_ANGLE = "angle";
     private static final String SETTINGS_PADDING = "padding";
 
-    private static final String SAVED_STATE_IMAGE_URI = "imageUri";
+    private static final String IMAGE_FILENAME = "image.data";
 
     public static final String ACTION_STOP_SERVICE = "neofusion.phantomage.STOP_SERVICE";
 
@@ -38,15 +47,13 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar mSeekBar;
     private View mMainView;
     private float mAngle = 0F;
+    private long mImageKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        if (savedInstanceState != null) {
-            mImageUri = savedInstanceState.getParcelable(SAVED_STATE_IMAGE_URI);
-        }
         mMainView = findViewById(R.id.main_layout);
         mImageView = findViewById(R.id.image_view);
         mImageView.setOnClickListener(new View.OnClickListener() {
@@ -104,9 +111,7 @@ public class MainActivity extends AppCompatActivity {
         clearImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAngle = 0F;
-                mImageUri = null;
-                Glide.with(getApplicationContext()).clear(mImageView);
+                clearImage();
             }
         });
         restoreSettings();
@@ -155,7 +160,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = mSettings.edit();
         if (mImageUri != null) {
             editor.putString(SETTINGS_IMAGE_URI, mImageUri.toString());
+        } else {
+            editor.remove(SETTINGS_IMAGE_URI);
         }
+        editor.putLong(SETTINGS_IMAGE_KEY, mImageKey);
         editor.putInt(SETTINGS_ALPHA, mSeekBar.getProgress());
         editor.putFloat(SETTINGS_ANGLE, mAngle);
         editor.putInt(SETTINGS_PADDING, getPadding());
@@ -168,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
             if (imageUriString != null) {
                 mImageUri = Uri.parse(imageUriString);
             }
+        }
+        if (mSettings.contains(SETTINGS_IMAGE_KEY)) {
+            mImageKey = mSettings.getLong(SETTINGS_IMAGE_KEY, System.currentTimeMillis());
         }
         if (mSettings.contains(SETTINGS_ANGLE)) {
             mAngle = mSettings.getFloat(SETTINGS_ANGLE, 0F);
@@ -186,25 +197,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadImage() {
         if (mImageUri != null) {
+            ObjectKey objectKey = new ObjectKey(mImageKey);
             if (mAngle == 0) {
-                Glide.with(this).load(mImageUri).into(mImageView);
+                Glide.with(this).load(mImageUri).signature(objectKey).into(mImageView);
             } else {
-                Glide.with(this).load(mImageUri).transform(new RotateTransformation(mAngle)).into(mImageView);
+                Glide.with(this).load(mImageUri).signature(objectKey).transform(new RotateTransformation(mAngle)).into(mImageView);
             }
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(SAVED_STATE_IMAGE_URI, mImageUri);
-        super.onSaveInstanceState(outState);
+    private void clearImage() {
+        mAngle = 0F;
+        mImageUri = null;
+        mImageKey = System.currentTimeMillis();
+        Glide.with(this).clear(mImageView);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            mImageUri = data.getData();
-            loadImage();
+            clearImage();
+            if (data.getData() != null) {
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                    File file = new File(getCacheDir(), IMAGE_FILENAME);
+                    Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    mImageUri = Uri.fromFile(file);
+                    mImageKey = System.currentTimeMillis();
+                    loadImage();
+                } catch (FileNotFoundException e) {
+                    Snackbar.make(mMainView, getString(R.string.error_file_not_found), Snackbar.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Snackbar.make(mMainView, getString(R.string.error_io), Snackbar.LENGTH_SHORT).show();
+                }
+            }
         }
     }
 

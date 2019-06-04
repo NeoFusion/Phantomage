@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 
 public class OverlayService extends Service {
     public static final String INTENT_EXTRA_ALPHA = "alpha";
@@ -66,10 +67,11 @@ public class OverlayService extends Service {
         layoutParams.alpha = alpha;
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mImageView.setPadding(0, padding, 0, 0);
+        ObjectKey objectKey = new ObjectKey(System.currentTimeMillis());
         if (angle == 0F) {
-            Glide.with(this).load(uri).into(mImageView);
+            Glide.with(this).load(uri).signature(objectKey).into(mImageView);
         } else {
-            Glide.with(this).load(uri).transform(new RotateTransformation(angle)).into(mImageView);
+            Glide.with(this).load(uri).signature(objectKey).transform(new RotateTransformation(angle)).into(mImageView);
         }
         if (!isRunning) {
             mWindowManager.addView(mOverlayView, layoutParams);
