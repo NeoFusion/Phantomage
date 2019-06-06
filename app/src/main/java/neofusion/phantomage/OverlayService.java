@@ -84,7 +84,7 @@ public class OverlayService extends Service {
     }
 
     private void createNotification() {
-        NotificationChannel channel = new NotificationChannel(CHANNEL_MAIN, getString(R.string.channel_main), NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_MAIN, getString(R.string.channel_main), NotificationManager.IMPORTANCE_HIGH);
         mNotificationManager.createNotificationChannel(channel);
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction(MainActivity.ACTION_STOP_SERVICE);
@@ -93,7 +93,7 @@ public class OverlayService extends Service {
         Notification notification = new Notification.Builder(getApplicationContext(), CHANNEL_MAIN)
                 .setContentTitle(getString(R.string.notification_title))
                 .setContentText(getString(R.string.notification_text))
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_stat_notify)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
                 .build();
