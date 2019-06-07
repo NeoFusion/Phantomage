@@ -29,7 +29,7 @@
         app:layout_constraintStart_toEndOf="@+id/button_start" />
 
     <TextView
-        android:id="@+id/text_opaque"
+        android:id="@+id/text_opacity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:min="10"
         android:max="90"
-        app:layout_constraintTop_toBottomOf="@+id/text_opaque" />
+        app:layout_constraintTop_toBottomOf="@+id/text_opacity" />
 
     <Button
         android:id="@+id/button_select_image"

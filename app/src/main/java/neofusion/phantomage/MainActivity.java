@@ -68,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
         mPaddingEdit = findViewById(R.id.edit_padding);
         mSeekBar = findViewById(R.id.seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            TextView opaqueText = findViewById(R.id.text_opaque);
+            TextView opacityText = findViewById(R.id.text_opacity);
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                opaqueText.setText(String.format(getResources().getString(R.string.text_opaque), seekBar.getProgress()));
+                opacityText.setText(String.format(getResources().getString(R.string.text_opacity), seekBar.getProgress()));
             }
 
             @Override
