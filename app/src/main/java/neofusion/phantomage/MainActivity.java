@@ -270,6 +270,10 @@ public class MainActivity extends Activity {
     }
 
     private int getPadding() {
-        return Integer.parseInt(mPaddingEdit.getText().toString());
+        try {
+            return Integer.parseInt(mPaddingEdit.getText().toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }
