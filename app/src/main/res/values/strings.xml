@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Phantomage</string>
+    <string name="button_ok">OK</string>
     <string name="button_start">Show overlay</string>
     <string name="button_stop">Hide overlay</string>
     <string name="button_select_image">Select image</string>
     <string name="button_clear_image">Clear image</string>
     <string name="channel_main">Main</string>
     <string name="image_view_description">Image preview</string>
+    <string name="menu_about">About</string>
     <string name="notification_title">This app displays on top of other apps you\'re using</string>
     <string name="notification_text">Press here to hide overlay</string>
     <string name="permission_overlay">Allow display over other apps</string>
