@@ -10,15 +10,14 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
@@ -30,7 +29,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private static final int READ_REQUEST_CODE = 1;
 
     private static final String SETTINGS_IMAGE_URI = "imageUri";
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setActionBar(toolbar);
         mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         mMainView = findViewById(R.id.main_layout);
         mImageView = findViewById(R.id.image_view);
