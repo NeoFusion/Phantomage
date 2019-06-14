@@ -12,7 +12,7 @@
     <string name="notification_text">Press here to hide overlay</string>
     <string name="permission_overlay">Allow display over other apps</string>
     <string name="snackbar_settings">SETTINGS</string>
-    <string name="text_about">v1.0.0, © NeoFusion, 2019</string>
+    <string name="text_about">v1.1.0, © NeoFusion, 2019</string>
     <string name="text_opacity">Opacity: %1$d%%</string>
     <string name="text_padding">Padding:</string>
     <string name="text_px">px</string>
