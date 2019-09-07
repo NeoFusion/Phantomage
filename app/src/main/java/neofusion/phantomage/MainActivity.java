@@ -4,13 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,8 +18,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -255,6 +257,9 @@ public class MainActivity extends Activity {
             if (data.getData() != null) {
                 try {
                     InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                    if (inputStream == null) {
+                        throw new IOException();
+                    }
                     File file = new File(getCacheDir(), IMAGE_FILENAME);
                     Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     mImageUri = Uri.fromFile(file);

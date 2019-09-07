@@ -10,12 +10,13 @@ import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
