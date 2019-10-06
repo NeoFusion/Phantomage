@@ -130,7 +130,19 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-        restoreSettings();
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null && type.startsWith("image/")) {
+            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if (imageUri != null) {
+                processImage(imageUri);
+            }
+            restoreSettings(false);
+            stopOverlayService();
+        } else {
+            restoreSettings(true);
+        }
         loadImage();
         if (ACTION_STOP_SERVICE.equals(getIntent().getAction())) {
             stopOverlayService();
@@ -186,17 +198,17 @@ public class MainActivity extends Activity {
         editor.apply();
     }
 
-    private void restoreSettings() {
-        if (mSettings.contains(SETTINGS_IMAGE_URI)) {
+    private void restoreSettings(boolean restoreImage) {
+        if (restoreImage && mSettings.contains(SETTINGS_IMAGE_URI)) {
             String imageUriString = mSettings.getString(SETTINGS_IMAGE_URI, null);
             if (imageUriString != null) {
                 mImageUri = Uri.parse(imageUriString);
             }
         }
-        if (mSettings.contains(SETTINGS_IMAGE_KEY)) {
+        if (restoreImage && mSettings.contains(SETTINGS_IMAGE_KEY)) {
             mImageKey = mSettings.getLong(SETTINGS_IMAGE_KEY, System.currentTimeMillis());
         }
-        if (mSettings.contains(SETTINGS_ANGLE)) {
+        if (restoreImage && mSettings.contains(SETTINGS_ANGLE)) {
             mAngle = mSettings.getFloat(SETTINGS_ANGLE, 0F);
         }
         if (mSettings.contains(SETTINGS_PADDING)) {
@@ -209,6 +221,27 @@ public class MainActivity extends Activity {
         } else {
             mSeekBar.setProgress(50);
         }
+    }
+
+    private void processImage(Uri imageUri) {
+        try {
+            mImageUri = saveImage(imageUri);
+            mImageKey = System.currentTimeMillis();
+        } catch (FileNotFoundException e) {
+            Snackbar.make(mMainView, getString(R.string.error_file_not_found), Snackbar.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Snackbar.make(mMainView, getString(R.string.error_io), Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private Uri saveImage(Uri data) throws IOException {
+        InputStream inputStream = getContentResolver().openInputStream(data);
+        if (inputStream == null) {
+            throw new IOException();
+        }
+        File file = new File(getCacheDir(), IMAGE_FILENAME);
+        Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        return Uri.fromFile(file);
     }
 
     private void loadImage() {
@@ -255,21 +288,8 @@ public class MainActivity extends Activity {
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             clearImage();
             if (data.getData() != null) {
-                try {
-                    InputStream inputStream = getContentResolver().openInputStream(data.getData());
-                    if (inputStream == null) {
-                        throw new IOException();
-                    }
-                    File file = new File(getCacheDir(), IMAGE_FILENAME);
-                    Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    mImageUri = Uri.fromFile(file);
-                    mImageKey = System.currentTimeMillis();
-                    loadImage();
-                } catch (FileNotFoundException e) {
-                    Snackbar.make(mMainView, getString(R.string.error_file_not_found), Snackbar.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Snackbar.make(mMainView, getString(R.string.error_io), Snackbar.LENGTH_SHORT).show();
-                }
+                processImage(data.getData());
+                loadImage();
             }
         }
     }
