@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.Menu;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toolbar;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.ObjectKey;
